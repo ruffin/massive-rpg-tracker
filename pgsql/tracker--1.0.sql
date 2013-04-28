@@ -13,14 +13,30 @@ CREATE TABLE passwords (
     password text NOT NULL
 );
 
+-- list of roles.
+-- first version includes the following
+-- player: has toons and their items
+-- writer: associated with campaigns and adventures
 CREATE TABLE role (
     role text PRIMARY KEY
 );
+GRANT SELECT ON role TO player;
+GRANT SELECT ON role TO writer;
 
-CREATE TABLE roles (
-    role text NOT NULL REFERENCES role ON UPDATE CASCADE ON DELETE CASCADE,
-    player int NOT NULL REFERENCES players ON DELETE CASCADE
+CREATE TABLE campaigns (
+    id serial PRIMARY KEY,
+    name text NOT NULL
 );
+GRANT SELECT ON campaigns TO player;
+GRANT SELECT, UPDATE, INSERT, DELETE ON campaigns TO writer;
+
+CREATE TABLE campaign_membership (
+    player int NOT NULL REFERENCES players ON DELETE CASCADE,
+    role text NOT NULL REFERENCES role ON UPDATE CASCADE,
+    campaign int NOT NULL REFERENCES campaigns ON UPDATE CASCADE ON DELETE CASCADE
+);
+GRANT SELECT, INSERT, DELETE ON campaign_membership TO player;
+GRANT SELECT, INSERT, UPDATE, DELETE ON campaign_membership to writer;
 
 CREATE TABLE toons (
     id serial PRIMARY KEY,
@@ -29,16 +45,10 @@ CREATE TABLE toons (
 );
 GRANT SELECT, UPDATE, DELETE ON toons TO player;
 
-CREATE TABLE available_years (
-    id text PRIMARY KEY
-);
-GRANT SELECT ON available_years to player;
-GRANT SELECT, UPDATE, INSERT, DELETE ON available_years to writer;
-
 CREATE TABLE adventures (
     id serial PRIMARY KEY,
-    author text,
-    year text REFERENCES available_years ON UPDATE CASCADE
+    campaign int REFERENCES campaigns ON UPDATE CASCADE ON DELETE CASCADE,
+    author text
 );
 GRANT SELECT ON adventures to player;
 GRANT SELECT, UPDATE, INSERT, DELETE ON adventures to writer;
