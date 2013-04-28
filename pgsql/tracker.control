@@ -1,0 +1,5 @@
+# versions must be x.y
+default_version=1.0
+superuser=false
+relocatable=false
+schema = 'tracker'
